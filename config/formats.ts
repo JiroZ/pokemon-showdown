@@ -18,6 +18,17 @@ The column value will be ignored for repeat sections.
 */
 
 export const Formats: FormatList = [
+	// Pokemonia
+	///////////////////////////////////////////////////////////////////
+	{
+		section: "Pokemonia",
+	},
+	{
+		name: "[National Dex] Free-Fight Pokemonia",
+		desc: `Pokemonia Free fight format with no clauses.`,
+		mod: 'gen8',
+		ruleset: ['Standard NatDex', '!Obtainable'],
+	},
 
 	// S/V Singles
 	///////////////////////////////////////////////////////////////////

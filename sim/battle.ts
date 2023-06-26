@@ -117,6 +117,7 @@ export class Battle {
 	readonly format: Format;
 	readonly formatData: EffectState;
 	readonly gameType: GameType;
+	readonly moniaGameType: MoniaGameType;
 	/**
 	 * The number of active pokemon per half-field.
 	 * See header comment in side.ts for details.
@@ -216,6 +217,7 @@ export class Battle {
 		this.strictChoices = !!options.strictChoices;
 		this.formatData = {id: format.id};
 		this.gameType = (format.gameType || 'singles');
+		this.moniaGameType = 'pvp'
 		this.field = new Field(this);
 		const isFourPlayer = this.gameType === 'multi' || this.gameType === 'freeforall';
 		this.sides = Array(isFourPlayer ? 4 : 2).fill(null) as any;
@@ -1359,6 +1361,11 @@ export class Battle {
 		for (const s of this.sides) {
 			if (s) s.activeRequest = null;
 		}
+
+		if (this.ended) {
+			this.add('battle-end', JSON.stringify(this.toJSON()));
+		}
+
 		return true;
 	}
 
@@ -1942,21 +1949,21 @@ export class Battle {
 			const name = effect.fullname === 'tox' ? 'psn' : effect.fullname;
 			switch (effect.id) {
 			case 'partiallytrapped':
-				this.add('-damage', target, target.getHealth, '[from] ' + this.effectState.sourceEffect.fullname, '[partiallytrapped]');
+				this.add('-damage', target, target.getHealth, '[from] ' + this.effectState.sourceEffect.fullname, '[partiallytrapped]', target?.set.partyIndex, "A");
 				break;
 			case 'powder':
-				this.add('-damage', target, target.getHealth, '[silent]');
+				this.add('-damage', target, target.getHealth, '[silent]', target?.set.partyIndex, "B");
 				break;
 			case 'confused':
-				this.add('-damage', target, target.getHealth, '[from] confusion');
+				this.add('-damage', target, target.getHealth, '[from] confusion', target?.set.partyIndex, "C");
 				break;
 			default:
 				if (effect.effectType === 'Move' || !name) {
-					this.add('-damage', target, target.getHealth);
+					this.add('-damage', target, target.getHealth, target?.set.partyIndex, "D");
 				} else if (source && (source !== target || effect.effectType === 'Ability')) {
-					this.add('-damage', target, target.getHealth, '[from] ' + name, '[of] ' + source);
+					this.add('-damage', target, target.getHealth, '[from] ' + name, '[of] ' + source, target?.set.partyIndex, "F");
 				} else {
-					this.add('-damage', target, target.getHealth, '[from] ' + name);
+					this.add('-damage', target, target.getHealth, '[from] ' + name, target?.set.partyIndex, "G");
 				}
 				break;
 			}
@@ -2046,7 +2053,7 @@ export class Battle {
 						source.removeVolatile('substitute');
 						source.subFainted = true;
 					} else {
-						this.add('-activate', source, 'Substitute', '[damage]');
+						this.add('-activate', source, 'Substitute', '[damage]', source?.set.partyIndex);
 					}
 					this.hint(hint + " has a Substitute, the target's Substitute takes the damage.");
 					return damage;
@@ -2060,13 +2067,13 @@ export class Battle {
 		damage = target.damage(damage, source, effect);
 		switch (effect.id) {
 		case 'strugglerecoil':
-			this.add('-damage', target, target.getHealth, '[from] recoil');
+			this.add('-damage', target, target.getHealth, '[from] recoil', target?.set.partyIndex, "H");
 			break;
 		case 'confusion':
-			this.add('-damage', target, target.getHealth, '[from] confusion');
+			this.add('-damage', target, target.getHealth, '[from] confusion', target?.set.partyIndex, "I");
 			break;
 		default:
-			this.add('-damage', target, target.getHealth);
+			this.add('-damage', target, target.getHealth, target?.set.partyIndex, "J");
 			break;
 		}
 		if (target.fainted) this.faint(target);
@@ -2092,24 +2099,24 @@ export class Battle {
 		switch (effect?.id) {
 		case 'leechseed':
 		case 'rest':
-			this.add('-heal', target, target.getHealth, '[silent]');
+			this.add('-heal', target, target.getHealth, target?.set.partyIndex, '[silent]');
 			break;
 		case 'drain':
-			this.add('-heal', target, target.getHealth, '[from] drain', '[of] ' + source);
+			this.add('-heal', target, target.getHealth, target?.set.partyIndex, '[from] drain', '[of] ' + source);
 			break;
 		case 'wish':
 			break;
 		case 'zpower':
-			this.add('-heal', target, target.getHealth, '[zeffect]');
+			this.add('-heal', target, target.getHealth, target?.set.partyIndex, '[zeffect]');
 			break;
 		default:
 			if (!effect) break;
 			if (effect.effectType === 'Move') {
-				this.add('-heal', target, target.getHealth);
+				this.add('-heal', target, target.getHealth, target?.set.partyIndex);
 			} else if (source && source !== target) {
-				this.add('-heal', target, target.getHealth, '[from] ' + effect.fullname, '[of] ' + source);
+				this.add('-heal', target, target.getHealth, target?.set.partyIndex, '[from] ' + effect.fullname, '[of] ' + source);
 			} else {
-				this.add('-heal', target, target.getHealth, '[from] ' + effect.fullname);
+				this.add('-heal', target, target.getHealth, target?.set.partyIndex, '[from] ' + effect.fullname);
 			}
 			break;
 		}

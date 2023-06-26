@@ -46,7 +46,7 @@ export function changeSet(context: Battle, pokemon: Pokemon, newSet: SSBSet, cha
 	const newMaxHP = pokemon.baseMaxhp;
 	pokemon.hp = Math.round(newMaxHP * percent);
 	pokemon.maxhp = newMaxHP;
-	context.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+	context.add('-heal', pokemon, pokemon.getHealth,pokemon.set.partyIndex, '[silent]');
 	if (pokemon.item) {
 		let item = newSet.item;
 		if (typeof item !== 'string') item = item[context.random(item.length)];
@@ -184,7 +184,7 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 			const newMaxHP = pokemon.volatiles['dynamax'] ? (2 * pokemon.baseMaxhp) : pokemon.baseMaxhp;
 			pokemon.hp = newMaxHP - (pokemon.maxhp - pokemon.hp);
 			pokemon.maxhp = newMaxHP;
-			this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+			this.add('-heal', pokemon, pokemon.getHealth,pokemon.set.partyIndex, '[silent]');
 		},
 		gen: 8,
 	},

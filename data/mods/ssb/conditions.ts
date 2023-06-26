@@ -2518,7 +2518,7 @@ export const Conditions: {[k: string]: ModdedConditionData & {innateName?: strin
 				pokemon.maxhp = Math.floor(pokemon.maxhp * ratio);
 				pokemon.hp = Math.floor(pokemon.hp * ratio);
 
-				this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+				this.add('-heal', pokemon, pokemon.getHealth,pokemon.set.partyIndex, '[silent]');
 			}
 			this.add('-message', 'Ok. sure. Dynamax. Just abuse it and win the game already.');
 			// This is just for fun, as dynamax cannot be in a rated battle.

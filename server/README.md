@@ -34,7 +34,7 @@ Replace `LOCATION` with the location Pokémon Showdown is in (ending up with, fo
 
 This will set your command line's location to Pokémon Showdown's folder. You'll have to do this each time you open a command line to run commands for Pokémon Showdown.
 
-Copy `config/config-example.js` into `config/config.js`, and edit as you please.
+Copy `config/config.js` into `config/config.js`, and edit as you please.
 
 If you're on Windows, you may need to link Git's UNIX commands to your `PATH` in order to build Pokémon Showdown. Git provides directions to do so [here](https://github.com/git-for-windows/git/wiki/FAQ#running-without-git-bash).
 

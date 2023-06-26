@@ -906,6 +906,7 @@ export class RoomBattle extends RoomGames.RoomGame<RoomBattlePlayer> {
 		} else {
 			this.logData = null;
 		}
+
 		// If a replay was saved at any point or we were configured to autosavereplays,
 		// reupload when the battle is over to overwrite the partial data (and potentially
 		// reflect any changes that may have been made to the replay's hidden status).

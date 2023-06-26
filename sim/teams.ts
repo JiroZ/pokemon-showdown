@@ -108,6 +108,15 @@ export interface PokemonSet {
 	 * Tera Type
 	 */
 	teraType?: string;
+
+	currPPs: number[];
+	maxPPs: number[];
+
+	initialHp: number;
+
+	status: string;
+
+	partyIndex: number;
 }
 
 export const Teams = new class Teams {
@@ -200,12 +209,42 @@ export const Teams = new class Teams {
 				buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
 				buf += ',' + (set.teraType || '');
 			}
+
+			//pps
+			if (set.maxPPs && set.currPPs) {
+				buf += '|' + set.maxPPs.map(String).map(this.packName).join(',')
+				buf += '|' + set.currPPs.map(String).map(this.packName).join(',')
+			}
+
+			//initialHp
+			if (set.initialHp) {
+				buf += '|' + set.initialHp;
+			} else {
+				buf += '|';
+			}
+
+			// Pokemonia party index
+			if (set.partyIndex) {
+				buf += '|' + set.partyIndex;
+			} else {
+				buf += '|';
+			}
+
+			//Pokemon Status Burn/Para etc
+			if (set.status) {
+				buf += '|' + set.status;
+			} else {
+				buf += '|';
+			}
 		}
 
+		//console.log("Packed " + buf)
 		return buf;
 	}
 
 	unpack(buf: string): PokemonSet[] | null {
+		console.log("Unpack " + buf)
+
 		if (!buf) return null;
 		if (typeof buf !== 'string') return buf;
 		if (buf.startsWith('[') && buf.endsWith(']')) {
@@ -259,6 +298,7 @@ export const Teams = new class Teams {
 			set.moves = buf.substring(i, j).split(',', 24).map(name => this.unpackName(name, Dex.moves));
 			i = j + 1;
 
+
 			// nature
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
@@ -269,6 +309,7 @@ export const Teams = new class Teams {
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
 			if (j !== i) {
+
 				const evs = buf.substring(i, j).split(',', 6);
 				set.evs = {
 					hp: Number(evs[0]) || 0,
@@ -291,6 +332,7 @@ export const Teams = new class Teams {
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
 			if (j !== i) {
+
 				const ivs = buf.substring(i, j).split(',', 6);
 				set.ivs = {
 					hp: ivs[0] === '' ? 31 : Number(ivs[0]) || 0,
@@ -306,6 +348,7 @@ export const Teams = new class Teams {
 			// shiny
 			j = buf.indexOf('|', i);
 			if (j < 0) return null;
+
 			if (i !== j) set.shiny = true;
 			i = j + 1;
 
@@ -316,7 +359,7 @@ export const Teams = new class Teams {
 			i = j + 1;
 
 			// happiness
-			j = buf.indexOf(']', i);
+			j = buf.indexOf('|', i);
 			let misc;
 			if (j < 0) {
 				if (i < buf.length) misc = buf.substring(i).split(',', 6);
@@ -331,10 +374,52 @@ export const Teams = new class Teams {
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 				set.teraType = misc[5];
 			}
+			i = j + 1;
+
+			//maxPP
+			j = buf.indexOf('|', i);
+			if (j < 0) return null;
+			set.maxPPs = buf.substring(i, j).split(',', 24).map(Number)
+			i = j + 1;
+
+			//initialPP
+			j = buf.indexOf('|', i);
+			if (j < 0) return null;
+			set.currPPs = buf.substring(i, j).split(',', 24).map(Number)
+			i = j + 1;
+
+			//initialHp
+			j = buf.indexOf('|', i);
+			if (j < 0) return null;
+			if (i !== j) set.initialHp = parseInt(buf.substring(i, j));
+			i = j + 1;
+			if ( typeof(set.initialHp) == "undefined" && set.initialHp == null ) {
+				set.initialHp = 0
+			}
+
+			//Pokemonia Party Index
+			j = buf.indexOf('|', i);
+			console.log("Test Index "+parseInt(buf.substring(i, j)))
+			if (j < 0) return null;
+			if (i !== j) set.partyIndex = parseInt(buf.substring(i, j));
+			i = j + 1;
+
+			//Status
+			j = buf.indexOf(']', i);
+			if (j < 0) {
+				set.status = buf.substring(i) || ''
+			} else if (i !== j) {
+				set.status = buf.substring(i, j) || '';
+			}
+
 			if (j < 0) break;
 			i = j + 1;
-		}
 
+			//console.log("Party Index: " + set.partyIndex)
+		}
+		//
+
+		//console.log("\nTeam----------- \n" + JSON.stringify(team))
 		return team;
 	}
 
@@ -345,7 +430,7 @@ export const Teams = new class Teams {
 	}
 
 	/** Will not entirely recover a packed name, but will be a pretty readable guess */
-	unpackName(name: string, dexTable?: {get: (name: string) => AnyObject}) {
+	unpackName(name: string, dexTable?: { get: (name: string) => AnyObject }) {
 		if (!name) return '';
 		if (dexTable) {
 			const obj = dexTable.get(name);
@@ -357,7 +442,7 @@ export const Teams = new class Teams {
 	/**
 	 * Exports a team in human-readable PS export format
 	 */
-	export(team: PokemonSet[], options?: {hideStats?: boolean}) {
+	export(team: PokemonSet[], options?: { hideStats?: boolean }) {
 		let output = '';
 		for (const set of team) {
 			output += this.exportSet(set, options) + `\n`;
@@ -365,7 +450,7 @@ export const Teams = new class Teams {
 		return output;
 	}
 
-	exportSet(set: PokemonSet, {hideStats}: {hideStats?: boolean} = {}) {
+	exportSet(set: PokemonSet, {hideStats}: { hideStats?: boolean } = {}) {
 		let out = ``;
 
 		// core
@@ -542,6 +627,7 @@ export const Teams = new class Teams {
 			set.moves.push(line);
 		}
 	}
+
 	/** Accepts a team in any format (JSON, packed, or exported) */
 	import(buffer: string): PokemonSet[] | null {
 		if (buffer.startsWith('[')) {
@@ -604,6 +690,11 @@ export const Teams = new class Teams {
 					ivs: {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31},
 					level: 100,
 					moves: [],
+					currPPs: [],
+					maxPPs: [],
+					initialHp: 0,
+					partyIndex: -1,
+					status: ""
 				};
 				sets.push(curSet);
 				this.parseExportedTeamLine(line, true, curSet);

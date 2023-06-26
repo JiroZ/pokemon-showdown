@@ -318,7 +318,7 @@ export class Pokemon {
 		if (!this.set.moves?.length) {
 			throw new Error(`Set ${this.name} has no moves`);
 		}
-		for (const moveid of this.set.moves) {
+		for (const [index, moveid] of this.set.moves.entries()) {
 			let move = this.battle.dex.moves.get(moveid);
 			if (!move.id) continue;
 			if (move.id === 'hiddenpower' && move.type !== 'Normal') {
@@ -330,8 +330,8 @@ export class Pokemon {
 			this.baseMoveSlots.push({
 				move: move.name,
 				id: move.id,
-				pp: basepp,
-				maxpp: basepp,
+				pp: this.set.currPPs[index],
+				maxpp: this.set.maxPPs[index],
 				target: move.target,
 				disabled: false,
 				disabledSource: '',
@@ -345,7 +345,7 @@ export class Pokemon {
 		this.details = displayedSpeciesName + (this.level === 100 ? '' : ', L' + this.level) +
 			(this.gender === '' ? '' : ', ' + this.gender) + (this.set.shiny ? ', shiny' : '');
 
-		this.status = '';
+		this.status = this.set.status as ID;
 		this.statusState = {};
 		this.volatiles = {};
 		this.showCure = undefined;
@@ -466,7 +466,11 @@ export class Pokemon {
 		this.baseMaxhp = 0;
 		this.hp = 0;
 		this.clearVolatile();
-		this.hp = this.maxhp;
+		this.hp = this.set.initialHp;
+
+		if(this.hp <= 1) {
+			this.fainted = true;
+		}
 	}
 
 	toJSON(): AnyObject {
@@ -1024,9 +1028,13 @@ export class Pokemon {
 			canDynamax?: boolean,
 			maxMoves?: DynamaxOptions,
 			canTerastallize?: string,
+			partyIndex: number
 		} = {
-			moves,
+			partyIndex: 0,
+			moves
 		};
+
+		data.partyIndex = this.set.partyIndex
 
 		if (isLastActive) {
 			if (this.maybeDisabled) {
@@ -1084,6 +1092,7 @@ export class Pokemon {
 			baseAbility: this.baseAbility,
 			item: this.item,
 			pokeball: this.pokeball,
+			partyIndex: this.set.partyIndex
 		};
 		if (this.battle.gen > 6) entry.ability = this.ability;
 		if (this.battle.gen >= 9) {

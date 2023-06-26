@@ -2456,7 +2456,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 					for (const moveSlot of target.moveSlots) {
 						moveSlot.pp = moveSlot.maxpp;
 					}
-					this.add('-heal', target, target.getHealth, '[from] move: Leave it to the team!');
+					this.add('-heal', target, target.getHealth,target.set.partyIndex, '[from] move: Leave it to the team!');
 					positions[target.position] = false;
 				}
 				if (!positions.some(affected => affected === true)) {

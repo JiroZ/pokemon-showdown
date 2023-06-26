@@ -16,12 +16,12 @@ try {
 	console.log("config.js doesn't exist - creating one with default settings...");
 	fs.writeFileSync(
 		path.resolve(__dirname, '../config/config.js'),
-		fs.readFileSync(path.resolve(__dirname, '../config/config-example.js'))
+		fs.readFileSync(path.resolve(__dirname, '../config/config.js'))
 	);
 } finally {
 	config = require('../config/config');
 }
-Object.assign(config, require('../config/config-example'));
+Object.assign(config, require('../config/config'));
 
 // Actually crash if we crash
 config.crashguard = false;

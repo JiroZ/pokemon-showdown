@@ -3040,7 +3040,7 @@ export const Abilities: {[abilityid: string]: AbilityData} = {
 			const newMaxHP = pokemon.volatiles['dynamax'] ? (2 * pokemon.baseMaxhp) : pokemon.baseMaxhp;
 			pokemon.hp = newMaxHP - (pokemon.maxhp - pokemon.hp);
 			pokemon.maxhp = newMaxHP;
-			this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+			this.add('-heal', pokemon, pokemon.getHealth, pokemon.set.partyIndex, '[silent]');
 		},
 		isPermanent: true,
 		name: "Power Construct",

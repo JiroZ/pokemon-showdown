@@ -444,7 +444,7 @@ export const Scripts: ModdedBattleScriptsData = {
 						this.battle.add('-fail', target);
 						return false;
 					}
-					this.battle.add('-heal', target, target.getHealth);
+					this.battle.add('-heal', target, target.getHealth, pokemon.set.partyIndex);
 					didSomething = true;
 				}
 				if (moveData.status) {

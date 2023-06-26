@@ -1200,7 +1200,7 @@ export class BattleActions {
 						didAnything = this.combineResults(didAnything, null);
 						continue;
 					}
-					this.battle.add('-heal', target, target.getHealth);
+					this.battle.add('-heal', target, target.getHealth, target.set.partyIndex);
 					didSomething = true;
 				}
 				if (moveData.status) {

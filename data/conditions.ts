@@ -417,7 +417,7 @@ export const Conditions: {[k: string]: ConditionData} = {
 		onSwitchIn(target) {
 			if (!target.fainted) {
 				target.heal(target.maxhp);
-				this.add('-heal', target, target.getHealth, '[from] move: ' + this.effectState.sourceEffect, '[zeffect]');
+				this.add('-heal', target, target.getHealth,target.set.partyIndex, '[from] move: ' + this.effectState.sourceEffect, '[zeffect]');
 				target.side.removeSlotCondition(target, 'healreplacement');
 			}
 		},
@@ -758,7 +758,7 @@ export const Conditions: {[k: string]: ConditionData} = {
 
 			pokemon.maxhp = Math.floor(pokemon.maxhp * ratio);
 			pokemon.hp = Math.floor(pokemon.hp * ratio);
-			this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+			this.add('-heal', pokemon, pokemon.getHealth,pokemon.set.partyIndex, '[silent]');
 		},
 		onTryAddVolatile(status, pokemon) {
 			if (status.id === 'flinch') return null;
@@ -786,7 +786,7 @@ export const Conditions: {[k: string]: ConditionData} = {
 			if (pokemon.baseSpecies.name === 'Shedinja') return;
 			pokemon.hp = pokemon.getUndynamaxedHP();
 			pokemon.maxhp = pokemon.baseMaxhp;
-			this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+			this.add('-heal', pokemon, pokemon.getHealth,pokemon.set.partyIndex, '[silent]');
 		},
 	},
 

@@ -7,6 +7,7 @@ interface ElimTree {
 }
 
 import type {TournamentPlayer} from './index';
+import {State} from "../../sim/state";
 
 /**
  * There are two types of elim nodes, player nodes
